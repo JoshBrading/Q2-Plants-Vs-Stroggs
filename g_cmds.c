@@ -1,7 +1,6 @@
 #include "g_local.h"
 #include "m_player.h"
 
-
 char *ClientTeam (edict_t *ent)
 {
 	char		*p;
@@ -879,6 +878,47 @@ void Cmd_PlayerList_f(edict_t *ent)
 	}
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
+/*
+=================
+jb547
+Added a small spawn function, works for a few entities
+=================
+*/
+void Cmd_Spawn_f(edict_t *ent)
+{
+	char *classname;
+	edict_t *spawnable;
+	vec3_t offset = { 0, 50, 0 };
+	edict_t *near;
+
+	spawnable = G_Spawn();
+	VectorCopy(ent->s.origin, spawnable->s.origin);
+	VectorAdd(offset, spawnable->s.origin, spawnable->s.origin);
+
+	
+	classname = gi.args();
+	if (Q_stricmp(classname, "") == 0){
+		gi.dprintf("Enter a classname to spawn, 'spawn [classname]'.\n");
+		//gi.dprintf("%s", g_edicts[1]);
+		return;
+	}
+	else{
+		//spawnable->team = "enemy";
+		spawnable->row = 1;
+		spawnable->col = 2;
+		spawnable->classname = classname;
+		ED_CallSpawn(spawnable);
+	}
+	gi.dprintf("Spawned %s at ", classname); gi.dprintf(vtos(spawnable->s.origin)); gi.dprintf("\n");
+	gi.dprintf("%s is on team: %s\nSpawned on row: %i col: %i \n", spawnable->classname, spawnable->team, spawnable->row, spawnable->col);
+	gi.dprintf(spawnable);
+
+	near = findradius(near, spawnable->s.origin, 1000);
+	for (int i = 0; i < sizeof(near); i++){
+		gi.dprintf("Entity found!\n");
+	}
+	return;
+}
 
 
 /*
@@ -968,6 +1008,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	else if (Q_stricmp(cmd, "spawn") == 0)
+		Cmd_Spawn_f(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

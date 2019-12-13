@@ -262,6 +262,9 @@ Called by ClientBeginServerFrame and ClientThink
 */
 void Think_Weapon (edict_t *ent)
 {
+
+	//gi.dprintf("I am holding a, %s", ent->client->pers.weapon->classname); // jb547 - returns the class name of the held weapon helping -- uras with this
+
 	// if just died, put the weapon away
 	if (ent->health < 1)
 	{
