@@ -314,7 +314,6 @@ void soldier_run (edict_t *self)
 	}
 }
 
-
 //
 // PAIN
 //

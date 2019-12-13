@@ -261,20 +261,7 @@ void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 }
 
 
-/*
-=================
-fire_shotgun
-
-Shoots shotgun pellets.  Used by shotgun and super shotgun.
-=================
-*/
-void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
-{
-	int		i;
-
-	for (i = 0; i < count; i++)
-		fire_lead (self, start, aimdir, damage, kick, TE_SHOTGUN, hspread, vspread, mod);
-}
+// moved fire_shotgun
 
 
 /*
@@ -630,6 +617,37 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	gi.linkentity (rocket);
 }
 
+/*
+=================
+fire_shotgun
+
+Shoots shotgun pellets.  Used by shotgun and super shotgun.
+
+jb547 Modified this to shoot rocket projectiles
+=================
+*/
+void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
+{
+	/*
+	int		i;
+
+	for (i = 0; i < count; i++)
+	fire_lead (self, start, aimdir, damage, kick, TE_SHOTGUN, hspread, vspread, mod);
+	*/
+	
+	edict_t	*rocket;
+	int speed = 250; int radius_damage = 10; int damage_radius = 10;
+	damage = 999;
+	
+	vec3_t startL, startR;
+	vec3_t offsetL = { 0, -60, 0 }; vec3_t offsetR = { 0, 60, 0 }; vec3_t offset = {0, 0, 0};
+	VectorAdd(offset, start, start);
+	VectorAdd(offsetL, start, startL); VectorAdd(offsetR, start, startR); // Ofsetting an extra rocket on both sides of the weapon for a triple shot
+
+	fire_rocket(self, start, aimdir, damage, speed, damage_radius, radius_damage);
+	fire_rocket(self, startL, aimdir, damage, speed, damage_radius, radius_damage);
+	fire_rocket(self, startR, aimdir, damage, speed, damage_radius, radius_damage);
+}
 
 /*
 =================
