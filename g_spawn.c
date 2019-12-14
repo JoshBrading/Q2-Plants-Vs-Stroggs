@@ -500,6 +500,7 @@ parsing textual entity definitions out of an ent file.
 */
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 {
+
 	edict_t		*ent;
 	int			inhibit;
 	char		*com_token;

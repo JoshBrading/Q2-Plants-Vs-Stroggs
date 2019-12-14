@@ -67,6 +67,9 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad)
 		from++;
 	for ( ; from < &g_edicts[globals.num_edicts]; from++)
 	{
+	//	if (from->team == "enemy")
+	//		gi.dprintf("Entity with classname: %s on team: %s\n", from->classname, from->team); // jb547 testing how to find entities
+		
 		if (!from->inuse)
 			continue;
 		if (from->solid == SOLID_NOT)
@@ -74,6 +77,7 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad)
 		for (j=0 ; j<3 ; j++)
 			eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j])*0.5);
 		if (VectorLength(eorg) > rad)
+			//gi.dprintf("Hit max radius, continue\n"); // jb547 still testing finding entities
 			continue;
 		return from;
 	}

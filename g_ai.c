@@ -366,8 +366,61 @@ void FoundTarget (edict_t *self)
 	// run for it
 	self->monsterinfo.run (self);
 }
+/*
+===========
+FindMonster
 
+This function is originally by Paril
+https://www.moddb.com/games/quake-2/tutorials/monsters-fighting-each-other
 
+Modified to support multiple teams
+============
+*/
+edict_t *FindMonster(edict_t *self)
+{
+	edict_t	*ent = NULL;
+	edict_t	*best = NULL;
+
+	int selfTeam;
+	int entTeam;
+	selfTeam = self->PvSTeam;
+	while ((ent = findradius(ent, self->s.origin, 1024)) != NULL)
+	{
+		entTeam = ent->PvSTeam;
+		//gi.dprintf("self on == %i == team is finding target on == %i == team\n", selfTeam, entTeam);
+		if ( self->PvSTeam )
+		{
+			gi.dprintf("Classname: %s Team: %s Row: %i Col: %i\n", self->classname, self->PvSTeam, self->row, self->col);
+
+		}
+		else{
+			gi.dprintf("Classname: %s Team: %s Row: %i Col: %i\n", self->classname, self->PvSTeam, self->row, self->col);
+
+		}
+		if (selfTeam == entTeam){ // jb547 - changed from (ent == self), we dont need to look for self if we check team
+		//if (ent == self){
+			continue;
+		}
+		if (!(ent->svflags & SVF_MONSTER))
+			continue;
+		if (!ent->health)
+			continue;
+		if (ent->health < 1)
+			continue;
+		if (!visible(self, ent))
+			continue;
+		if (!best)
+		{
+			best = ent;
+			continue;
+		}
+		if (ent->max_health <= best->max_health)
+			continue;
+		best = ent;
+	}
+
+	return best;
+}
 /*
 ===========
 FindTarget
@@ -390,7 +443,8 @@ qboolean FindTarget (edict_t *self)
 	edict_t		*client;
 	qboolean	heardit;
 	int			r;
-
+	edict_t *monster;
+	gi.dprintf("FindTarget() called");
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 	{
 		if (self->goalentity && self->goalentity->inuse && self->goalentity->classname)
@@ -402,6 +456,16 @@ qboolean FindTarget (edict_t *self)
 		//FIXME look for monsters?
 		return false;
 	}
+	//================================	jb547 Has monsters attack each other.
+	monster = FindMonster(self);	//
+	gi.dprintf("FindMonster() called");
+	if (monster)					//
+	{								//	This code is originally from Paril
+		self->enemy = monster;		//	https://www.moddb.com/games/quake-2/tutorials/monsters-fighting-each-other
+		FoundTarget(self);			//
+		return true;				//
+	}								//
+	//================================
 
 	// if we're going to a combat point, just proceed
 	if (self->monsterinfo.aiflags & AI_COMBAT_POINT)
@@ -561,6 +625,7 @@ qboolean FindTarget (edict_t *self)
 		self->monsterinfo.sight (self, self->enemy);
 
 	return true;
+	
 }
 
 

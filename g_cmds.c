@@ -881,7 +881,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 /*
 =================
 jb547
-Added a small spawn function, works for a few entities
+Added a spawn function, should work for all entities
 =================
 */
 void Cmd_Spawn_f(edict_t *ent)
@@ -889,37 +889,94 @@ void Cmd_Spawn_f(edict_t *ent)
 	char *classname;
 	edict_t *spawnable;
 	vec3_t offset = { 0, 50, 0 };
-	edict_t *near;
 
 	spawnable = G_Spawn();
 	VectorCopy(ent->s.origin, spawnable->s.origin);
 	VectorAdd(offset, spawnable->s.origin, spawnable->s.origin);
 
-	
+
 	classname = gi.args();
 	if (Q_stricmp(classname, "") == 0){
 		gi.dprintf("Enter a classname to spawn, 'spawn [classname]'.\n");
-		//gi.dprintf("%s", g_edicts[1]);
 		return;
 	}
 	else{
-		//spawnable->team = "enemy";
-		spawnable->row = 1;
-		spawnable->col = 2;
+		spawnable->PvSTeam = "enemy";    //
+		spawnable->row = 1;            // this will be changed later...
+		spawnable->col = 2;            //
+	//	strcpy(spawnable->classname, classname);
 		spawnable->classname = classname;
 		ED_CallSpawn(spawnable);
 	}
-	gi.dprintf("Spawned %s at ", classname); gi.dprintf(vtos(spawnable->s.origin)); gi.dprintf("\n");
-	gi.dprintf("%s is on team: %s\nSpawned on row: %i col: %i \n", spawnable->classname, spawnable->team, spawnable->row, spawnable->col);
-	gi.dprintf(spawnable);
+	gi.dprintf("Spawned: %s team: %s\nSpawned row: %i col: %i \n Spawn Coord: %s", spawnable->classname, spawnable->PvSTeam, spawnable->row, spawnable->col, vtos(spawnable->s.origin));
 
-	near = findradius(near, spawnable->s.origin, 1000);
-	for (int i = 0; i < sizeof(near); i++){
-		gi.dprintf("Entity found!\n");
-	}
 	return;
 }
+/*
+=================
+jb547
+Added a function to check if entities are near
+=================
+*/
+void Cmd_Nearby_f(edict_t *ent)
+{
+	edict_t *entity;
+	entity = g_edicts;
+	qboolean test = true;
+	edict_t *enemy;
 
+	for (; entity < &g_edicts[globals.num_edicts]; entity++){
+		if (entity->team == "enemy")
+		{
+			gi.dprintf("Entity # %s on team: %s\n", entity, entity->team); // jb547 testing how to find entities
+			if (test){
+				gi.dprintf("Setting entity: %s as target to next enemy", entity);
+				enemy = entity;
+				test = false;
+			}
+			else{
+				entity->enemy = enemy;
+				gi.dprintf("Set %s as enemy of %s", enemy, entity);
+			}
+		}
+		//	if (!entity->inuse)
+	//		continue;
+	//	if (entity->solid == SOLID_NOT)
+	//		continue;
+	}
+	//near = findradius(near, ent->s.origin, 99999);
+	//for (int i = 0; i < sizeof(near); i++){
+		//gi.dprintf("Entity found with classname: %s\n", near->classname);
+	//}
+}
+/*
+=================
+jb547
+Added a function to build the game board
+=================
+*/
+void Cmd_Build_f(edict_t *ent)
+{
+	vec3_t gameSpawn = { 2112, 696, 226 }, gameAngle = { 67, 90, 24 };
+	vec3_t rAnim1 = { 1868, 271, -47 }, rAnim2 = { 2316, 1147, -47 },	rAnim3 = { 1531, 827, -47 },	rAnim4 = { 2692, 573, -47 };
+	vec3_t rDir1 = { 0, 90, 0 },		rDir2 = { 0, -90, 0 },			rDir3 = { 90, 0, 0 },			rDir4 = { -90, 0, 0 };
+	int rDamage = 0, rSpeed = 50, rDR = 99, rRD = 99;
+	Cmd_Noclip_f(ent);
+	Cmd_Notarget_f(ent);
+	Cmd_God_f(ent);
+
+	VectorCopy(gameSpawn, ent->s.origin);
+	VectorClear(ent->client->v_angle);
+	VectorCopy(gameAngle, ent->client->v_angle);
+	fire_rocket(ent, rAnim1, rDir1, rDamage, rSpeed, rDR, rRD);
+	fire_rocket(ent, rAnim2, rDir2, rDamage, rSpeed, rDR, rRD);
+	fire_rocket(ent, rAnim3, rDir3, rDamage, rSpeed, rDR, rRD);
+	fire_rocket(ent, rAnim4, rDir4, rDamage, rSpeed, rDR, rRD);
+
+	//testFunction();
+
+	//ent->client->ps.pmove.pm_time = 99999;
+}
 
 /*
 =================
@@ -1010,6 +1067,10 @@ void ClientCommand (edict_t *ent)
 		Cmd_PlayerList_f(ent);
 	else if (Q_stricmp(cmd, "spawn") == 0)
 		Cmd_Spawn_f(ent);
+	else if (Q_stricmp(cmd, "near") == 0)
+		Cmd_Nearby_f(ent);
+	else if (Q_strcasecmp(cmd, "build") == 0)
+		Cmd_Build_f(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

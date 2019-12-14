@@ -1092,7 +1092,8 @@ struct edict_s
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 
-	int *row;
-	int *col;
+	int row;
+	int col;
+	int PvSTeam;
 };
 

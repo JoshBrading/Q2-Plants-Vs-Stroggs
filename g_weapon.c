@@ -615,6 +615,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 		check_dodge (self, rocket->s.origin, dir, speed);
 
 	gi.linkentity (rocket);
+	gi.dprintf("Rockets view angle is: %i", dir);
 }
 
 /*
