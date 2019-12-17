@@ -130,21 +130,21 @@ void()	berserk_runb12	=[	$r_att12 ,	berserk_runb7	] {ai_run(19);};
 
 mframe_t berserk_frames_run1 [] =
 {
-	ai_run, 21, NULL,
-	ai_run, 11, NULL,
-	ai_run, 21, NULL,
-	ai_run, 25, NULL,
-	ai_run, 18, NULL,
-	ai_run, 19, NULL
+	ai_run, 1, NULL, // 21
+	ai_run, 1, NULL, // 11
+	ai_run, 1, NULL, // 11    Just added a decimal to these
+	ai_run, 1, NULL, // 25    Slows the run speed by... a lot.
+	ai_run, 1, NULL, // 18
+	ai_run, 1, NULL  // 19
 };
-mmove_t berserk_move_run1 = {FRAME_run1, FRAME_run6, berserk_frames_run1, NULL};
+mmove_t berserk_move_run1 = { FRAME_run1, FRAME_run6, berserk_frames_run1, NULL }; // FRAME_run1, FRAME_run6, berserk_frames_run1, NULL
 
 void berserk_run (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		self->monsterinfo.currentmove = &berserk_move_stand;
 	else
-		self->monsterinfo.currentmove = &berserk_move_run1;
+		self->monsterinfo.currentmove = &berserk_move_run1; // was run1
 }
 
 

@@ -894,21 +894,16 @@ void Cmd_Spawn_f(edict_t *ent)
 	VectorCopy(ent->s.origin, spawnable->s.origin);
 	VectorAdd(offset, spawnable->s.origin, spawnable->s.origin);
 
-
 	classname = gi.args();
 	if (Q_stricmp(classname, "") == 0){
 		gi.dprintf("Enter a classname to spawn, 'spawn [classname]'.\n");
 		return;
 	}
 	else{
-		spawnable->PvSTeam = "enemy";    //
-		spawnable->row = 1;            // this will be changed later...
-		spawnable->col = 2;            //
-	//	strcpy(spawnable->classname, classname);
 		spawnable->classname = classname;
 		ED_CallSpawn(spawnable);
 	}
-	gi.dprintf("Spawned: %s team: %s\nSpawned row: %i col: %i \n Spawn Coord: %s", spawnable->classname, spawnable->PvSTeam, spawnable->row, spawnable->col, vtos(spawnable->s.origin));
+	gi.dprintf("Spawned: %s Spawn Coord: %s\n", spawnable->classname, spawnable->PvSTeam, spawnable->row, spawnable->col, vtos(spawnable->s.origin));
 
 	return;
 }
@@ -916,16 +911,24 @@ void Cmd_Spawn_f(edict_t *ent)
 =================
 jb547
 Added a function to check if entities are near
+
+Doesnt do much of its original intent, reprogrammed this to different things throughout development
 =================
 */
 void Cmd_Nearby_f(edict_t *ent)
 {
+	float time = level.time;
+	gi.dprintf("\nCurrent Time: %f\n", time);
+
+	/*
 	edict_t *entity;
 	entity = g_edicts;
 	qboolean test = true;
 	edict_t *enemy;
-
+	int ent_count = 0;
+	
 	for (; entity < &g_edicts[globals.num_edicts]; entity++){
+		ent_count++;
 		if (entity->team == "enemy")
 		{
 			gi.dprintf("Entity # %s on team: %s\n", entity, entity->team); // jb547 testing how to find entities
@@ -948,6 +951,8 @@ void Cmd_Nearby_f(edict_t *ent)
 	//for (int i = 0; i < sizeof(near); i++){
 		//gi.dprintf("Entity found with classname: %s\n", near->classname);
 	//}
+	gi.dprintf("Final ent count: %i\n", ent_count);
+	*/
 }
 /*
 =================
@@ -957,23 +962,46 @@ Added a function to build the game board
 */
 void Cmd_Build_f(edict_t *ent)
 {
-	vec3_t gameSpawn = { 2112, 696, 226 }, gameAngle = { 67, 90, 24 };
-	vec3_t rAnim1 = { 1868, 271, -47 }, rAnim2 = { 2316, 1147, -47 },	rAnim3 = { 1531, 827, -47 },	rAnim4 = { 2692, 573, -47 };
-	vec3_t rDir1 = { 0, 90, 0 },		rDir2 = { 0, -90, 0 },			rDir3 = { 90, 0, 0 },			rDir4 = { -90, 0, 0 };
+	// (2520, 300, -10) is top left of board
+	//	 x     y     z
+	// (2760, 840, -10) is bottom right of board
+	// (2610, 570, ...) is ~center of board
+	vec3_t gameSpawn = { 2610, 570, 250 };
+	vec3_t rAnim1 = { 2520, 200, -47 },		rAnim2 = { 2760, 840, -47 },	rAnim3 = { 2420, 300, -47 },	rAnim4 = { 2800, 840, -47 };
+	vec3_t rDir1 = { 0, 90, 0 },			rDir2 = { 0, -90, 0 },			rDir3 = { 90, 0, 0 },			rDir4 = { -90, 0, 0 };
+
 	int rDamage = 0, rSpeed = 50, rDR = 99, rRD = 99;
-	Cmd_Noclip_f(ent);
-	Cmd_Notarget_f(ent);
-	Cmd_God_f(ent);
+	suns = 0;
+	
+	ent->movetype = MOVETYPE_NOCLIP;
+	ent->flags ^= FL_NOTARGET;
+	if (!(ent->flags & FL_NOTARGET))
+		ent->flags ^= FL_NOTARGET;
+	ent->flags ^= FL_GODMODE;
+	if (!(ent->flags & FL_GODMODE))
+		ent->flags ^= FL_GODMODE;
+
+	gi.cvar_set("cl_gun", "0");
 
 	VectorCopy(gameSpawn, ent->s.origin);
-	VectorClear(ent->client->v_angle);
-	VectorCopy(gameAngle, ent->client->v_angle);
+	//VectorClear(ent->client->v_angle); // attempted to change players view for game start but doesnt seem to work
+	//VectorCopy(gameAngle, ent->client->v_angle);
+
 	fire_rocket(ent, rAnim1, rDir1, rDamage, rSpeed, rDR, rRD);
 	fire_rocket(ent, rAnim2, rDir2, rDamage, rSpeed, rDR, rRD);
 	fire_rocket(ent, rAnim3, rDir3, rDamage, rSpeed, rDR, rRD);
 	fire_rocket(ent, rAnim4, rDir4, rDamage, rSpeed, rDR, rRD);
 
-	//testFunction();
+	BuildBoardLoop();
+	HousePlantSpawns();
+	wave_count = 1;
+	ZombieSpawnSequence(12);
+	//for (;level.time <= timer ;){
+	//	if (timer == level.time){
+	//		ZombieSpawns();
+	//		break;
+	//	}
+	//}
 
 	//ent->client->ps.pmove.pm_time = 99999;
 }
@@ -1069,7 +1097,7 @@ void ClientCommand (edict_t *ent)
 		Cmd_Spawn_f(ent);
 	else if (Q_stricmp(cmd, "near") == 0)
 		Cmd_Nearby_f(ent);
-	else if (Q_strcasecmp(cmd, "build") == 0)
+	else if (Q_strcasecmp(cmd, "start") == 0)
 		Cmd_Build_f(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);

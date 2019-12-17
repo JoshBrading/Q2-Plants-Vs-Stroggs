@@ -1,5 +1,6 @@
 
 #include "g_local.h"
+#include <stdlib.h>
 
 game_locals_t	game;
 level_locals_t	level;
@@ -10,6 +11,7 @@ spawn_temp_t	st;
 int	sm_meat_index;
 int	snd_fry;
 int meansOfDeath;
+int wave_count;
 
 edict_t		*g_edicts;
 
@@ -421,3 +423,167 @@ void G_RunFrame (void)
 	ClientEndServerFrames ();
 }
 
+void HousePlantSpawns() // weird function name, basically if the zombies kill these dudes the have entered 
+{						// the players house and "killed" the player ending the game
+	vec3_t Pspawn1 = { 2550, 810, -120 }, Pspawn2 = { 2610, 810, -120 }, Pspawn3 = { 2670, 810, -120 }, Pspawn4 = { 2730, 810, -120 };
+	edict_t *plant1, *plant2, *plant3, *plant4;
+
+	plant1 = G_Spawn();
+	plant1->classname = "monster_berserk";
+	plant1->PvSTeam = "plant";
+	plant1->row = 1;
+	plant1->health = 1;
+
+	VectorCopy(Pspawn1, plant1->s.origin);
+	ED_CallSpawn(plant1);
+
+	plant2 = G_Spawn();
+	plant2->classname = "monster_berserk";
+	plant2->PvSTeam = "plant";
+	plant2->row = 2;
+	plant2->health = 1;
+
+	VectorCopy(Pspawn2, plant2->s.origin);
+	ED_CallSpawn(plant2);
+
+	plant3 = G_Spawn();
+
+	plant3->classname = "monster_berserk";
+	plant3->PvSTeam = "plant";
+	plant3->row = 3;
+	plant3->health = 1;
+
+	VectorCopy(Pspawn3, plant3->s.origin);
+	ED_CallSpawn(plant3);
+
+	plant4 = G_Spawn();
+	plant4->classname = "monster_berserk";
+	plant4->PvSTeam = "plant";
+	plant4->row = 4;
+	plant4->health = 1;
+	VectorCopy(Pspawn4, plant4->s.origin);
+	ED_CallSpawn(plant4);
+}
+void Zrandomize(edict_t *zombie)
+{
+	const char *classes[3];
+	classes[0] = "monster_berserk";
+	classes[1] = "monster_floater";
+	classes[2] = "monster_chick";
+	classes[3] = "monster_soldier";
+
+	const char *types[4];
+	types[0] = 0;
+	types[1] = 0;
+	types[2] = 0;
+	types[3] = 0;
+
+	int num = (rand() % 3);
+	num = 0;
+	zombie->classname = classes[num];
+	zombie->type = types[num];
+}
+void ZombieSpawnSequence(int num_zombies)
+{
+	int zombie_count;
+	vec3_t Zspawn = { 2730, 300, -10 };
+
+	for (int col = 0; col < 10 ; col++)
+	{
+		for (int row = 4; row >= 1; row--)
+		{
+			edict_t *zombie;
+			if (zombie_count == num_zombies)
+				return;
+			
+			zombie = G_Spawn();
+			Zrandomize(zombie);
+			zombie->row = row;
+			VectorCopy(Zspawn, zombie->s.origin);
+			ED_CallSpawn(zombie);
+			zombie->max_health = 100;
+			zombie->health = 100;
+			Zspawn[0] -= 60;
+			
+			zombie_count++;
+		}
+		Zspawn[0] = 2730;
+		Zspawn[1] -= 60;
+	}
+}
+void ZombieSpawns()
+{
+	//gi.dprintf("wave_count increased to %i\n", wave_count);
+//	if (wave_count == 1)
+
+	if (wave_count == 10){
+		// (2520, 300, -10) is top left of board
+		//	 x     y     z
+		// (2760, 840, -10) is bottom right of board
+		vec3_t Zspawn1 = { 2550, 300, -10 }, Zspawn2 = { 2610, 300, -10 }, Zspawn3 = { 2670, 300, -10 }, Zspawn4 = { 2730, 300, -10 };
+		edict_t *zombie1, *zombie2, *zombie3, *zombie4;
+
+		zombie1 = G_Spawn();
+		zombie1->classname = "monster_berserk";
+		zombie1->PvSTeam = "zombie";
+		zombie1->row = 1;
+		zombie1->wave = 1;
+		VectorCopy(Zspawn1, zombie1->s.origin);
+		ED_CallSpawn(zombie1);
+		zombie1->max_health = 100;
+		zombie1->health = 100;
+
+		zombie2 = G_Spawn();
+		zombie2->classname = "monster_berserk";
+		zombie2->PvSTeam = "zombie";
+		zombie2->row = 2;
+		zombie2->wave = 1;
+		VectorCopy(Zspawn2, zombie2->s.origin);
+		ED_CallSpawn(zombie2);
+		zombie2->max_health = 100;
+		zombie2->health = 100;
+
+		zombie3 = G_Spawn();
+		zombie3->classname = "monster_berserk";
+		zombie3->PvSTeam = "zombie";
+		zombie3->row = 3;
+		zombie3->wave = 1;
+		VectorCopy(Zspawn3, zombie3->s.origin);
+		ED_CallSpawn(zombie3);
+		zombie3->max_health = 100;
+		zombie3->health = 100;
+
+		zombie4 = G_Spawn();
+		zombie4->classname = "monster_berserk";
+		zombie4->PvSTeam = "zombie";
+		zombie4->row = 4;
+		zombie4->wave = 1;
+		VectorCopy(Zspawn4, zombie4->s.origin);
+		ED_CallSpawn(zombie4);
+		zombie4->max_health = 100;
+		zombie4->health = 100;
+	}
+	else{
+		//gi.dprintf("You win!");
+	}
+}
+void BuildBoardLoop(){
+	// (2520, 300, -10) is top left of board
+	//	 x     y     z
+	// (2700, 840, -10) is bottom right of board
+	vec3_t Bspawn1 = { 2790, 870, -160 };
+	int side_count = 3; // spawns this + 1 cause its 4am and this isnt important enough to fix
+	int change = (570 / side_count);
+	for (int i = 0; i < side_count + 1; i++){
+		for (int j = 0; j < 2; j++){
+			edict_t *boarder1;
+			boarder1 = G_Spawn();
+			boarder1->classname = "monster_floater";
+			VectorCopy(Bspawn1, boarder1->s.origin);
+			ED_CallSpawn(boarder1);
+			Bspawn1[0] = 2490;
+		}
+		Bspawn1[0] = 2790;
+		Bspawn1[1] -= change;
+	}
+}

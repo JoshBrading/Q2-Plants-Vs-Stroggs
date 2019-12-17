@@ -1094,6 +1094,12 @@ struct edict_s
 
 	int row;
 	int col;
-	int PvSTeam;
+	char PvSTeam;
+	int wave;
+	int type;
+	float time;
 };
 
+int suns;
+extern int wave_count;
+extern float PvSTimer;

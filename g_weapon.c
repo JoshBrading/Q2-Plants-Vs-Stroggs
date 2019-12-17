@@ -263,7 +263,46 @@ void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 
 // moved fire_shotgun
 
+/*
+=================
+get_row
+get_col
+Returns the row/col of the attempted spawn point
+=================
+*/
+int get_row(vec3_t org)
+{
+	int row_count = 4;
+	int pos = (int)org[0];
 
+	for (int row = 1; row <= row_count; row++){ // returns the row
+		if ( 2520 < pos && pos < 2520 + (60 * row)) // does the math shit
+			return row;
+	}
+	return 0; // if the row is not within the field return 0
+}
+int get_col(vec3_t org)
+{
+	int col_count = 7;
+	int pos = (int)org[1];
+
+	for (int col = 1; col <= col_count; col++){ // returns the col
+		if (780 > pos && pos < 360 + (60 * col)) // does the math shit
+			return col;
+	}
+	return 0; // if the col is not within the field return 0
+}
+int tile_occupied(edict_t *self, int row, int col){
+	edict_t	*ent = NULL;
+	while ((ent = findradius(ent, self->s.origin, 1024)) != NULL)
+	{
+		if (self == ent) // We dont want to find self
+			continue;
+		if (row == ent->row && col == ent->col)
+			return 1;
+	}
+	return 0;
+}
 /*
 =================
 fire_blaster
@@ -273,6 +312,60 @@ Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 */
 void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	int row = get_row(self->s.origin);
+	int col = get_col(self->s.origin);
+	
+	self->row = row;
+	self->col = col;
+	if (tile_occupied(self, row, col))
+		return;
+
+	if (row != 0 && col != 0)
+	{
+		edict_t *plant;
+		vec3_t spawn_point;
+		vec3_t height_offset = {0, 0, 0};
+		int offset_amount = 0;
+		VectorCopy(self->s.origin, spawn_point);
+
+		plant = G_Spawn();
+		plant->classname = "monster_soldier";
+		plant->PvSTeam = "plant";
+		plant->type = 0;
+		plant->row = row;
+		plant->col = col;
+		if (row == 1)
+			spawn_point[0] = 2550;
+		if (row == 2)
+			spawn_point[0] = 2610;
+		if (row == 3)
+			spawn_point[0] = 2670;
+		if (row == 4)
+			spawn_point[0] = 2730;
+
+		if (col == 1)
+			spawn_point[1] = 390;
+		if (col == 2)
+			spawn_point[1] = 450;
+		if (col == 3)
+			spawn_point[1] = 510;
+		if (col == 4)
+			spawn_point[1] = 570;
+		if (col == 5)
+			spawn_point[1] = 630;
+		if (col == 6)
+			spawn_point[1] = 690;
+		if (col == 7)
+			spawn_point[1] = 750;
+
+		spawn_point[2] = -140; // this offsets the spawn height since enemies dont want to shoot their buddys
+
+		VectorCopy(spawn_point, plant->s.origin);
+		ED_CallSpawn(plant);
+	}
+	G_FreeEdict(self);
+	
+	/*
 	int		mod;
 
 	if (other == self->owner)
@@ -308,6 +401,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	}
 
 	G_FreeEdict (self);
+	*/
 }
 
 void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)
@@ -574,6 +668,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH);
 
+	/* The explosion is annoying for this mod so getting rid of it
 	gi.WriteByte (svc_temp_entity);
 	if (ent->waterlevel)
 		gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
@@ -581,7 +676,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
-
+	*/
 	G_FreeEdict (ent);
 }
 
@@ -597,10 +692,10 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	rocket->movetype = MOVETYPE_FLYMISSILE;
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
-	rocket->s.effects |= EF_ROCKET;
+	rocket->s.effects |= EF_ROCKET; // was EF_ROCKET
 	VectorClear (rocket->mins);
 	VectorClear (rocket->maxs);
-	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
+	rocket->s.modelindex = gi.modelindex ("sprites/s_bfg1.sp2"); //models/objects/rocket/tris.md2
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
 	rocket->nextthink = level.time + 8000/speed;
@@ -608,14 +703,13 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	rocket->dmg = damage;
 	rocket->radius_dmg = radius_damage;
 	rocket->dmg_radius = damage_radius;
-	rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
+	//rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
 	rocket->classname = "rocket";
 
 	if (self->client)
 		check_dodge (self, rocket->s.origin, dir, speed);
 
 	gi.linkentity (rocket);
-	gi.dprintf("Rockets view angle is: %i", dir);
 }
 
 /*
@@ -635,19 +729,31 @@ void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	for (i = 0; i < count; i++)
 	fire_lead (self, start, aimdir, damage, kick, TE_SHOTGUN, hspread, vspread, mod);
 	*/
-	
-	edict_t	*rocket;
-	int speed = 250; int radius_damage = 10; int damage_radius = 10;
-	damage = 999;
-	
-	vec3_t startL, startR;
-	vec3_t offsetL = { 0, -60, 0 }; vec3_t offsetR = { 0, 60, 0 }; vec3_t offset = {0, 0, 0};
-	VectorAdd(offset, start, start);
-	VectorAdd(offsetL, start, startL); VectorAdd(offsetR, start, startR); // Ofsetting an extra rocket on both sides of the weapon for a triple shot
 
-	fire_rocket(self, start, aimdir, damage, speed, damage_radius, radius_damage);
-	fire_rocket(self, startL, aimdir, damage, speed, damage_radius, radius_damage);
-	fire_rocket(self, startR, aimdir, damage, speed, damage_radius, radius_damage);
+	edict_t	*rocket;
+	int speed = 1; int radius_damage = 1; int damage_radius = 1;
+	damage = 25;
+	int type;
+	type = self->type;
+
+	vec3_t startL, startR, dir = { 0, -90, 0 };
+	start[2] = -85; // Since were changing our direction we need to raise our shot height to not hit friendlies
+	
+	if (type == 0)
+	{
+		fire_rocket(self, start, dir, damage, speed, damage_radius, radius_damage);
+	}
+	if (type == 1)
+	{
+		vec3_t offsetL = { -60,0, 0 }; vec3_t offsetR = {60, 0, 0 };
+		VectorAdd(offsetL, start, startL); VectorAdd(offsetR, start, startR); // Ofsetting an extra rocket on both sides of the weapon for a triple shot
+
+		fire_rocket(self, start, dir, damage, speed, damage_radius, radius_damage);
+		fire_rocket(self, startL, dir, damage, speed, damage_radius, radius_damage);
+		fire_rocket(self, startR, dir, damage, speed, damage_radius, radius_damage);
+	}
+	
+	gi.dprintf("Plant type: %i", type);
 }
 
 /*

@@ -381,26 +381,23 @@ edict_t *FindMonster(edict_t *self)
 	edict_t	*ent = NULL;
 	edict_t	*best = NULL;
 
-	int selfTeam;
-	int entTeam;
+	int wave = 0;
+	char selfTeam;
+	char entTeam;
 	selfTeam = self->PvSTeam;
 	while ((ent = findradius(ent, self->s.origin, 1024)) != NULL)
 	{
+		int health = ent->health;
 		entTeam = ent->PvSTeam;
-		//gi.dprintf("self on == %i == team is finding target on == %i == team\n", selfTeam, entTeam);
-		if ( self->PvSTeam )
-		{
-			gi.dprintf("Classname: %s Team: %s Row: %i Col: %i\n", self->classname, self->PvSTeam, self->row, self->col);
 
+		if (ent->wave != 0){ // jb547 if there are enemies from the wave left, wave++
+			wave++;
+			wave_count = ent->wave + 1;
 		}
-		else{
-			gi.dprintf("Classname: %s Team: %s Row: %i Col: %i\n", self->classname, self->PvSTeam, self->row, self->col);
-
-		}
-		if (selfTeam == entTeam){ // jb547 - changed from (ent == self), we dont need to look for self if we check team
-		//if (ent == self){
+		if (selfTeam == entTeam) // jb547 - Changed from (ent == self), we dont need to look for self if we check team
 			continue;
-		}
+		if (self->row != ent->row) // jb547 - Check if the entity is in the same row so we dont leave our row
+			continue;
 		if (!(ent->svflags & SVF_MONSTER))
 			continue;
 		if (!ent->health)
@@ -418,6 +415,8 @@ edict_t *FindMonster(edict_t *self)
 			continue;
 		best = ent;
 	}
+	if (wave == 0) // jb547 if no enemies in the wave were found, start the next wave
+		ZombieSpawns();
 
 	return best;
 }
@@ -444,7 +443,6 @@ qboolean FindTarget (edict_t *self)
 	qboolean	heardit;
 	int			r;
 	edict_t *monster;
-	gi.dprintf("FindTarget() called");
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 	{
 		if (self->goalentity && self->goalentity->inuse && self->goalentity->classname)
@@ -458,7 +456,6 @@ qboolean FindTarget (edict_t *self)
 	}
 	//================================	jb547 Has monsters attack each other.
 	monster = FindMonster(self);	//
-	gi.dprintf("FindMonster() called");
 	if (monster)					//
 	{								//	This code is originally from Paril
 		self->enemy = monster;		//	https://www.moddb.com/games/quake-2/tutorials/monsters-fighting-each-other
