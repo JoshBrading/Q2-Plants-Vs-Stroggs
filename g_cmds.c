@@ -60,6 +60,8 @@ void SelectNextItem (edict_t *ent, int itflags)
 	if (current_type == "Threepeater")
 		ent->type = "Sunflower";
 	if (current_type == "Sunflower")
+		ent->type = "Wallnut";
+	if (current_type == "Wallnut")
 		ent->type = "Peashooter";
 	Cmd_Help_f(ent);
 	/*
@@ -99,13 +101,15 @@ void SelectPrevItem (edict_t *ent, int itflags)
 	Cmd_Help_f(ent);
 	int current_type = ent->type;
 	if (current_type == "Peashooter")
-		ent->type = "Sunflower";
+		ent->type = "Wallnut";
 	if (current_type == "Repeater")
 		ent->type = "Peashooter";
 	if (current_type == "Threepeater")
 		ent->type = "Repeater";
 	if (current_type == "Sunflower")
 		ent->type = "Threepeater";
+	if (current_type == "Wallnut")
+		ent->type = "Sunflower";
 	Cmd_Help_f(ent);
 	/*
 	gclient_t	*cl;
@@ -963,7 +967,7 @@ void add_suns(edict_t *client)
 				sunflowers++;
 			}
 		}
-		suns += 100 * sunflowers;
+		suns += 25 * sunflowers;
 		PvSTimer += 0.5;
 		Cmd_Help_f(client);
 	}

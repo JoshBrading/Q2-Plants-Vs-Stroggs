@@ -292,7 +292,7 @@ void HelpComputer (edict_t *ent)
 		help2 = "Repeater \n200 SUN";
 	if (help2 == "Threepeater")
 		help2 = "Threepeater \n500 SUN";
-	if (help2 == "weapon_Machinegun")
+	if (help2 == "Wallnut")
 		help2 = "Wall-nut \n50 SUN";
 	if (help2 == "Sunflower")
 		help2 = "Sunflower \n25 SUN";

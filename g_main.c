@@ -357,20 +357,21 @@ void Zrandomize(edict_t *zombie)
 {
 	const char *classes[3];
 	classes[0] = "monster_berserk";
-	classes[1] = "monster_floater";
-	classes[2] = "monster_chick";
-	classes[3] = "monster_soldier";
+	classes[1] = "monster_berserk";
+	//classes[2] = "monster_chick";
+	//classes[3] = "monster_soldier";
 
 	const char *types[4];
-	types[0] = 0;
-	types[1] = 0;
-	types[2] = 0;
-	types[3] = 0;
+	types[0] = "Basic";
+	types[1] = "Cone";
+	//types[2] = 0;
+	//types[3] = 0;
 
-	int num = (rand() % 3);
-	num = 0;
+	int num = (rand() % 2);
+//	num = 0;
 	zombie->classname = classes[num];
 	zombie->type = types[num];
+	gi.dprintf("Spawning: %s", zombie->type);
 }
 void ZombieSpawnSequence(int num_zombies)
 {
@@ -389,11 +390,23 @@ void ZombieSpawnSequence(int num_zombies)
 			Zrandomize(zombie);
 			zombie->row = row;
 			zombie->PvSTeam = "zombie";
-			zombie->type = "zombie";
+			//zombie->type = "zombie";
 			VectorCopy(Zspawn, zombie->s.origin);
 			ED_CallSpawn(zombie);
-			zombie->max_health = 100;
-			zombie->health = 100;
+			if (zombie->type == "Cone"){
+				zombie->s.effects |= EF_COLOR_SHELL;
+				zombie->s.renderfx |= RF_SHELL_RED;
+				zombie->max_health = 200;
+				zombie->health = 200;
+			}
+			else{
+				zombie->s.effects |= EF_COLOR_SHELL;
+				zombie->s.renderfx |= RF_SHELL_BLUE;
+				zombie->max_health = 100;
+				zombie->health = 100;
+			}
+
+
 			Zspawn[0] -= 60;
 
 			zombie_count++;
@@ -427,7 +440,7 @@ void CheckWave(){
 	vec3_t origin = { 2550, 810, -120 };
 	while ((ent = findradius(ent, origin, 1024)) != NULL)
 	{
-		if (ent->PvSTeam == "zombie" || ent->type == "zombie") // For some reason if type is set to "zombie" it cant see PvSTeam = "zombie"?
+		if (ent->PvSTeam == "zombie" || ent->type == "Basic" || ent->type == "Cone") // For some reason if type is set to "zombie" it cant see PvSTeam = "zombie"?
 			return;
 	}
 	if (wave_count < 5)
@@ -441,7 +454,7 @@ void CheckHome(){
 	while ((ent = findradius(ent, origin, 1024)) != NULL)
 	{
 		if (ent->type == "home" || ent->type == "homesungen"){
-			gi.dprintf("home plant");
+		//	gi.dprintf("home plant");
 			home++;
 		}
 	}

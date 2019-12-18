@@ -81,7 +81,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>E:\Program Files (x86)\Steam\steamapps\common\Quake 2\PvS</OutDir>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Quake 2\PvS</OutDir>
     <IntDir>
     </IntDir>
     <LinkIncremental>false</LinkIncremental>

@@ -50,8 +50,7 @@ qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick)
 	float		range;
 	vec3_t		dir;
 	//kick = 0;
-	//if (self->type == "Sunflower")
-	//	damage = 1;
+	damage = 25;
 	//see if enemy is in range
 	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
 	range = VectorLength(dir);
@@ -125,6 +124,8 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	vec3_t		water_start;
 	qboolean	water = false;
 	int			content_mask = MASK_SHOT | MASK_WATER;
+
+	start[2] = -85;
 
 	tr = gi.trace (self->s.origin, NULL, NULL, start, self, MASK_SHOT);
 	if (!(tr.fraction < 1.0))
@@ -259,6 +260,7 @@ pistols, rifles, etc....
 */
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod)
 {
+	damage = 0;
 	fire_lead (self, start, aimdir, damage, kick, TE_GUNSHOT, hspread, vspread, mod);
 }
 
@@ -316,17 +318,30 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 {
 	int row = get_row(self->s.origin);
 	int col = get_col(self->s.origin);
+	int health;
 	self->row = row;
 	self->col = col;
 	int cost;
-	if (self->type == "Peashooter")
+	if (self->type == "Peashooter"){
 		cost = 100;
-	if (self->type == "Repeater")
+		health = 100;
+	}
+	if (self->type == "Repeater"){
 		cost = 200;
-	if (self->type == "Threepeater")
+		health = 100;
+	}
+	if (self->type == "Threepeater"){
 		cost = 500;
-	if (self->type == "Sunflower")
+		health = 150;
+	}
+	if (self->type == "Sunflower"){
 		cost = 25;
+		health = 50;
+	}
+	if (self->type == "Wallnut"){
+		cost = 50;
+		health = 500;
+	}
 	
 	if (suns < cost)
 		return;
@@ -343,14 +358,17 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		VectorCopy(self->s.origin, spawn_point);
 
 		plant = G_Spawn();
-		if (self->type == "Sunflower")
-			plant->classname = "monster_berserk";
+		if (self->type == "Sunflower" || self->type == "Wallnut")
+			plant->classname = "monster_gunner";
 		else
 			plant->classname = "monster_soldier";
 		plant->PvSTeam = "plant";
 		plant->type = self->type;
+		plant->viewheight = 10;
 		plant->row = row;
 		plant->col = col;
+		plant->s.effects |= EF_COLOR_SHELL;
+		plant->s.renderfx |= RF_SHELL_GREEN;
 		if (row == 1)
 			spawn_point[0] = 2550;
 		if (row == 2)
@@ -379,6 +397,9 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 		VectorCopy(spawn_point, plant->s.origin);
 		ED_CallSpawn(plant);
+		plant->max_health = health;
+		plant->health = health;
+		
 		suns -= cost;
 	}
 	G_FreeEdict(self);
@@ -566,6 +587,7 @@ static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius)
 {
+	return;
 	edict_t	*grenade;
 	vec3_t	dir;
 	vec3_t	forward, right, up;
@@ -779,7 +801,7 @@ void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 		fire_rocket(self, startR, dir, damage, speed, damage_radius, radius_damage);
 	}
 	
-	gi.dprintf("Plant type: %i", type);
+	//gi.dprintf("Plant type: %i", type);
 }
 
 /*
