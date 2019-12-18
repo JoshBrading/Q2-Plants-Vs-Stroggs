@@ -561,7 +561,7 @@ qboolean FindTarget (edict_t *self)
 			}
 		}
 
-		self->enemy = client; // jb547 testing targeting
+		self->enemy = client;
 
 		if (strcmp(self->enemy->classname, "player_noise") != 0)
 		{
@@ -610,7 +610,7 @@ qboolean FindTarget (edict_t *self)
 
 		// hunt the sound for a bit; hopefully find the real player
 		self->monsterinfo.aiflags |= AI_SOUND_TARGET;
-		self->enemy = client; // jb547 testing targeting
+		self->enemy = client;
 	}
 
 //

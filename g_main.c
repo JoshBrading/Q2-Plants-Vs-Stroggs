@@ -421,6 +421,8 @@ void G_RunFrame (void)
 
 	// build the playerstate_t structures for all players
 	ClientEndServerFrames ();
+
+
 }
 
 void HousePlantSpawns() // weird function name, basically if the zombies kill these dudes the have entered 
@@ -431,6 +433,7 @@ void HousePlantSpawns() // weird function name, basically if the zombies kill th
 	plant1 = G_Spawn();
 	plant1->classname = "monster_berserk";
 	plant1->PvSTeam = "plant";
+	plant1->type = 0;
 	plant1->row = 1;
 	plant1->health = 1;
 
@@ -440,6 +443,7 @@ void HousePlantSpawns() // weird function name, basically if the zombies kill th
 	plant2 = G_Spawn();
 	plant2->classname = "monster_berserk";
 	plant2->PvSTeam = "plant";
+	plant2->type = 6;
 	plant2->row = 2;
 	plant2->health = 1;
 
@@ -450,6 +454,7 @@ void HousePlantSpawns() // weird function name, basically if the zombies kill th
 
 	plant3->classname = "monster_berserk";
 	plant3->PvSTeam = "plant";
+	plant3->type = 6;
 	plant3->row = 3;
 	plant3->health = 1;
 
@@ -459,6 +464,7 @@ void HousePlantSpawns() // weird function name, basically if the zombies kill th
 	plant4 = G_Spawn();
 	plant4->classname = "monster_berserk";
 	plant4->PvSTeam = "plant";
+	plant4->type = 6;
 	plant4->row = 4;
 	plant4->health = 1;
 	VectorCopy(Pspawn4, plant4->s.origin);

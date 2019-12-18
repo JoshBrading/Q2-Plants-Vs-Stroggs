@@ -1102,4 +1102,3 @@ struct edict_s
 
 int suns;
 extern int wave_count;
-extern float PvSTimer;

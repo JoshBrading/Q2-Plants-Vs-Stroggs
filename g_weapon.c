@@ -317,6 +317,10 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	
 	self->row = row;
 	self->col = col;
+
+	if (suns < 100)
+		return;
+
 	if (tile_occupied(self, row, col))
 		return;
 
@@ -331,7 +335,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		plant = G_Spawn();
 		plant->classname = "monster_soldier";
 		plant->PvSTeam = "plant";
-		plant->type = 0;
+		plant->type = self->type;
 		plant->row = row;
 		plant->col = col;
 		if (row == 1)
@@ -362,6 +366,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 		VectorCopy(spawn_point, plant->s.origin);
 		ED_CallSpawn(plant);
+		suns -= 100;
 	}
 	G_FreeEdict(self);
 	
@@ -436,6 +441,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt";
+	bolt->type = self->type; // transfering type value to blaster_touch
 	if (hyper)
 		bolt->spawnflags = 1;
 	gi.linkentity (bolt);
@@ -738,12 +744,12 @@ void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 
 	vec3_t startL, startR, dir = { 0, -90, 0 };
 	start[2] = -85; // Since were changing our direction we need to raise our shot height to not hit friendlies
-	
-	if (type == 0)
+	start[1] += 10;
+	if (type == "Peashooter")
 	{
 		fire_rocket(self, start, dir, damage, speed, damage_radius, radius_damage);
 	}
-	if (type == 1)
+	if (type == "Repeater")
 	{
 		vec3_t offsetL = { -60,0, 0 }; vec3_t offsetR = {60, 0, 0 };
 		VectorAdd(offsetL, start, startL); VectorAdd(offsetR, start, startR); // Ofsetting an extra rocket on both sides of the weapon for a triple shot

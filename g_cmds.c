@@ -1,6 +1,10 @@
 #include "g_local.h"
 #include "m_player.h"
 
+float PvSTime;
+float PvSTimer = 0;
+
+
 char *ClientTeam (edict_t *ent)
 {
 	char		*p;
@@ -45,6 +49,14 @@ qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
 
 void SelectNextItem (edict_t *ent, int itflags)
 {
+	// jb547
+	// I know this is ugly and not proper but this was a last minute change
+	Cmd_Help_f(ent);
+	int current_type = ent->type;
+	if (current_type == "Peashooter")
+		ent->type = "Repeater";
+	Cmd_Help_f(ent);
+	/*
 	gclient_t	*cl;
 	int			i, index;
 	gitem_t		*it;
@@ -73,10 +85,15 @@ void SelectNextItem (edict_t *ent, int itflags)
 	}
 
 	cl->pers.selected_item = -1;
+	*/
 }
 
 void SelectPrevItem (edict_t *ent, int itflags)
 {
+	int current_type = ent->type;
+	if (current_type == "Repeater")
+		ent->type = "Peashooter";
+	/*
 	gclient_t	*cl;
 	int			i, index;
 	gitem_t		*it;
@@ -105,6 +122,7 @@ void SelectPrevItem (edict_t *ent, int itflags)
 	}
 
 	cl->pers.selected_item = -1;
+	*/
 }
 
 void ValidateSelectedItem (edict_t *ent)
@@ -144,7 +162,8 @@ void Cmd_Give_f (edict_t *ent)
 		return;
 	}
 
-	name = gi.args();
+//	name = gi.args();
+	name = "all"; // Give the player all items
 
 	if (Q_stricmp(name, "all") == 0)
 		give_all = true;
@@ -910,54 +929,38 @@ void Cmd_Spawn_f(edict_t *ent)
 /*
 =================
 jb547
-Added a function to check if entities are near
-
-Doesnt do much of its original intent, reprogrammed this to different things throughout development
+Adds suns to the player if sunflowers are planted every x seconds
 =================
 */
-void Cmd_Nearby_f(edict_t *ent)
+void add_suns(edict_t *client)
 {
-	float time = level.time;
-	gi.dprintf("\nCurrent Time: %f\n", time);
+	int sunflowers = 0;
+	int sun_start = suns;
 
-	/*
-	edict_t *entity;
-	entity = g_edicts;
-	qboolean test = true;
-	edict_t *enemy;
-	int ent_count = 0;
-	
-	for (; entity < &g_edicts[globals.num_edicts]; entity++){
-		ent_count++;
-		if (entity->team == "enemy")
+	PvSTime = level.time;
+	//gi.dprintf("%f / %f\n", PvSTime, PvSTimer);
+	if (PvSTime > PvSTimer){
+		Cmd_Help_f(client);
+		edict_t	*PvS = NULL;
+		vec3_t coord = { 2520, 200, -47 };
+		while ((PvS = findradius(PvS, coord, 1024)) != NULL)
 		{
-			gi.dprintf("Entity # %s on team: %s\n", entity, entity->team); // jb547 testing how to find entities
-			if (test){
-				gi.dprintf("Setting entity: %s as target to next enemy", entity);
-				enemy = entity;
-				test = false;
-			}
-			else{
-				entity->enemy = enemy;
-				gi.dprintf("Set %s as enemy of %s", enemy, entity);
+			if (PvS->type == 6){
+				sunflowers++;
 			}
 		}
-		//	if (!entity->inuse)
-	//		continue;
-	//	if (entity->solid == SOLID_NOT)
-	//		continue;
+		suns += 25 * sunflowers;
+		PvSTimer += 0.5;
+		Cmd_Help_f(client);
 	}
-	//near = findradius(near, ent->s.origin, 99999);
-	//for (int i = 0; i < sizeof(near); i++){
-		//gi.dprintf("Entity found with classname: %s\n", near->classname);
-	//}
-	gi.dprintf("Final ent count: %i\n", ent_count);
-	*/
+	if (suns > sun_start){
+		gi.cprintf(client, PRINT_CHAT, "\n \n+%i SUNS!\nCurrent Suns: %i\nPress 'F1' to open menu", 25 * sunflowers, suns);
+	}
 }
 /*
 =================
 jb547
-Added a function to build the game board
+Calls anything needed to build the and start the game.
 =================
 */
 void Cmd_Build_f(edict_t *ent)
@@ -971,8 +974,6 @@ void Cmd_Build_f(edict_t *ent)
 	vec3_t rDir1 = { 0, 90, 0 },			rDir2 = { 0, -90, 0 },			rDir3 = { 90, 0, 0 },			rDir4 = { -90, 0, 0 };
 
 	int rDamage = 0, rSpeed = 50, rDR = 99, rRD = 99;
-	suns = 0;
-	
 	ent->movetype = MOVETYPE_NOCLIP;
 	ent->flags ^= FL_NOTARGET;
 	if (!(ent->flags & FL_NOTARGET))
@@ -981,29 +982,22 @@ void Cmd_Build_f(edict_t *ent)
 	if (!(ent->flags & FL_GODMODE))
 		ent->flags ^= FL_GODMODE;
 
-	gi.cvar_set("cl_gun", "0");
+	gi.cvar_set("cl_gun", "0"); // Hide players gun
 
-	VectorCopy(gameSpawn, ent->s.origin);
-	//VectorClear(ent->client->v_angle); // attempted to change players view for game start but doesnt seem to work
-	//VectorCopy(gameAngle, ent->client->v_angle);
+	VectorCopy(gameSpawn, ent->s.origin); // TP the player to the game
 
-	fire_rocket(ent, rAnim1, rDir1, rDamage, rSpeed, rDR, rRD);
-	fire_rocket(ent, rAnim2, rDir2, rDamage, rSpeed, rDR, rRD);
-	fire_rocket(ent, rAnim3, rDir3, rDamage, rSpeed, rDR, rRD);
-	fire_rocket(ent, rAnim4, rDir4, rDamage, rSpeed, rDR, rRD);
+	fire_rocket(ent, rAnim1, rDir1, rDamage, rSpeed, rDR, rRD); // Just a cool looking effect on the game start
+	fire_rocket(ent, rAnim2, rDir2, rDamage, rSpeed, rDR, rRD); // Maybe each new wave also....?
+	fire_rocket(ent, rAnim3, rDir3, rDamage, rSpeed, rDR, rRD); //
+	fire_rocket(ent, rAnim4, rDir4, rDamage, rSpeed, rDR, rRD); //
 
+	ent->type = "Peashooter"; //  Have the player start with a peashooter, mostly just cause its first in the help menu
+	
+	Cmd_Give_f(ent);
 	BuildBoardLoop();
 	HousePlantSpawns();
 	wave_count = 1;
 	ZombieSpawnSequence(12);
-	//for (;level.time <= timer ;){
-	//	if (timer == level.time){
-	//		ZombieSpawns();
-	//		break;
-	//	}
-	//}
-
-	//ent->client->ps.pmove.pm_time = 99999;
 }
 
 /*
@@ -1095,8 +1089,6 @@ void ClientCommand (edict_t *ent)
 		Cmd_PlayerList_f(ent);
 	else if (Q_stricmp(cmd, "spawn") == 0)
 		Cmd_Spawn_f(ent);
-	else if (Q_stricmp(cmd, "near") == 0)
-		Cmd_Nearby_f(ent);
 	else if (Q_strcasecmp(cmd, "start") == 0)
 		Cmd_Build_f(ent);
 	else	// anything that doesn't match a command will be a chat
