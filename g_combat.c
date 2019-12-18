@@ -72,6 +72,8 @@ Killed
 */
 void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+	targ->PvSTeam = "DEAD"; // This needs to not be null when checking for enemies left in the wave
+	targ->type = "DEAD";
 	if (targ->health < -999)
 		targ->health = -999;
 
@@ -275,6 +277,15 @@ static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, in
 
 void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 {
+	if (targ->type == "home" || targ->type == "homesungen") // jb547
+		return;
+	if (targ->row == attacker->row) // if we get shot, make sure the attacker is in our row before going after them
+	{
+		targ->enemy = attacker;
+		FoundTarget(targ);
+	}
+	return;
+	/*
 	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER))
 		return;
 
@@ -346,6 +357,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 		if (!(targ->monsterinfo.aiflags & AI_DUCKED))
 			FoundTarget (targ);
 	}
+	*/
 }
 
 qboolean CheckTeamDamage (edict_t *targ, edict_t *attacker)
@@ -363,10 +375,10 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	int			asave;
 	int			psave;
 	int			te_sparks;
-
+	
 	if (!targ->takedamage)
 		return;
-
+	knockback = 0; // jb547
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs

@@ -285,20 +285,20 @@ void HelpComputer (edict_t *ent)
 	char	string[1024];
 	char	*sk; char *help2 = "Plants are 1-7";
 	help2 = ent->type;//client->pers.weapon->classname;
-	/*
-	if (help2 == "weapon_blaster")
+	
+	if (help2 == "Peashooter")
 		help2 = "Peashooter \n100 SUN";
-	if (help2 == "weapon_bfg")
+	if (help2 == "Repeater")
 		help2 = "Repeater \n200 SUN";
-	if (help2 == "weapon_supershotgun")
+	if (help2 == "Threepeater")
 		help2 = "Threepeater \n500 SUN";
 	if (help2 == "weapon_Machinegun")
 		help2 = "Wall-nut \n50 SUN";
-	if (help2 == "weapon_railgun")
+	if (help2 == "Sunflower")
 		help2 = "Sunflower \n25 SUN";
 	if (help2 == "weapon_hyperblaster")
 		help2 = "Cherry Bombs \n150 SUN";
-	*/
+	
 	if (skill->value == 0)
 		sk = "easy";
 	else if (skill->value == 1)
@@ -310,17 +310,14 @@ void HelpComputer (edict_t *ent)
 
 	// send the layout
 	Com_sprintf(string, sizeof(string),
-		"xv -300 yv 8 picn help "			// background
-		"xv 202 yv 12 string2 \PvS\" "		// skill
-		"xv 0 yv 24 cstring2 \"Plants Vs Stroggs\" "		// level name
-		"xv 0 yv 54 cstring2 \"Peashooter -- Repeater \nThreepeater -- Wall-nut \nSunflower -- Charry Bombs\" "		// help 1
-		"xv 0 yv 110 cstring2 \"SELECTED\n\n%s\" "		// help 2
-		"xv 50 yv 164 string2 \"  WAVE     SUNS    secrets\" "
-		"xv 50 yv 172 string2 \"%3i/5       %i         %i/%i\" ",
-		help2,
-		wave_count, suns,
-		level.total_goals,
-		level.found_secrets, level.total_secrets);
+		"xv -468 yv 8 picn help "			// background
+		"xv -290 yv 12 string2 \"PvS\" "		// skill
+		"xv -500 yv 24 cstring2 \"Plants Vs Stroggs\" "		// level name
+		"xv -500 yv 54 cstring2 \"Peashooter -- Repeater \nThreepeater -- Sunflower \nWall-nut -- Charry Bombs\" "		// help 1
+		"xv -500 yv 110 cstring2 \"SELECTED\n\n%s\" "		// help 2
+		"xv -450 yv 164 string2 \"  WAVE     SUNS    \" "
+		"xv -450 yv 172 string2 \"%3i/5       %i         \" ",
+		help2, wave_count, suns);
 
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);

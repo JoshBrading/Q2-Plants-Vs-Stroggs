@@ -49,7 +49,9 @@ qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick)
 	vec3_t		point;
 	float		range;
 	vec3_t		dir;
-
+	//kick = 0;
+	//if (self->type == "Sunflower")
+	//	damage = 1;
 	//see if enemy is in range
 	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
 	range = VectorLength(dir);
@@ -314,11 +316,19 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 {
 	int row = get_row(self->s.origin);
 	int col = get_col(self->s.origin);
-	
 	self->row = row;
 	self->col = col;
-
-	if (suns < 100)
+	int cost;
+	if (self->type == "Peashooter")
+		cost = 100;
+	if (self->type == "Repeater")
+		cost = 200;
+	if (self->type == "Threepeater")
+		cost = 500;
+	if (self->type == "Sunflower")
+		cost = 25;
+	
+	if (suns < cost)
 		return;
 
 	if (tile_occupied(self, row, col))
@@ -333,7 +343,10 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		VectorCopy(self->s.origin, spawn_point);
 
 		plant = G_Spawn();
-		plant->classname = "monster_soldier";
+		if (self->type == "Sunflower")
+			plant->classname = "monster_berserk";
+		else
+			plant->classname = "monster_soldier";
 		plant->PvSTeam = "plant";
 		plant->type = self->type;
 		plant->row = row;
@@ -366,7 +379,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 		VectorCopy(spawn_point, plant->s.origin);
 		ED_CallSpawn(plant);
-		suns -= 100;
+		suns -= cost;
 	}
 	G_FreeEdict(self);
 	
@@ -698,7 +711,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	rocket->movetype = MOVETYPE_FLYMISSILE;
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
-	rocket->s.effects |= EF_ROCKET; // was EF_ROCKET
+	//rocket->s.effects |= EF_ROCKET;
 	VectorClear (rocket->mins);
 	VectorClear (rocket->maxs);
 	rocket->s.modelindex = gi.modelindex ("sprites/s_bfg1.sp2"); //models/objects/rocket/tris.md2
@@ -744,12 +757,19 @@ void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 
 	vec3_t startL, startR, dir = { 0, -90, 0 };
 	start[2] = -85; // Since were changing our direction we need to raise our shot height to not hit friendlies
-	start[1] += 10;
+	start[1] += 20;
 	if (type == "Peashooter")
 	{
 		fire_rocket(self, start, dir, damage, speed, damage_radius, radius_damage);
 	}
-	if (type == "Repeater")
+	if (type == "Repeater"){
+		vec3_t offsetL = { 0, -10, 0 };
+		VectorAdd(offsetL, start, startL);
+
+		fire_rocket(self, start, dir, damage, speed, damage_radius, radius_damage);
+		fire_rocket(self, startL, dir, damage, speed, damage_radius, radius_damage);
+	}
+	if (type == "Threepeater")
 	{
 		vec3_t offsetL = { -60,0, 0 }; vec3_t offsetR = {60, 0, 0 };
 		VectorAdd(offsetL, start, startL); VectorAdd(offsetR, start, startR); // Ofsetting an extra rocket on both sides of the weapon for a triple shot

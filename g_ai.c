@@ -381,7 +381,6 @@ edict_t *FindMonster(edict_t *self)
 	edict_t	*ent = NULL;
 	edict_t	*best = NULL;
 
-	int wave = 0;
 	char selfTeam;
 	char entTeam;
 	selfTeam = self->PvSTeam;
@@ -389,11 +388,6 @@ edict_t *FindMonster(edict_t *self)
 	{
 		int health = ent->health;
 		entTeam = ent->PvSTeam;
-
-		if (ent->wave != 0){ // jb547 if there are enemies from the wave left, wave++
-			wave++;
-			wave_count = ent->wave + 1;
-		}
 		if (selfTeam == entTeam) // jb547 - Changed from (ent == self), we dont need to look for self if we check team
 			continue;
 		if (self->row != ent->row) // jb547 - Check if the entity is in the same row so we dont leave our row
@@ -415,9 +409,6 @@ edict_t *FindMonster(edict_t *self)
 			continue;
 		best = ent;
 	}
-	if (wave == 0) // jb547 if no enemies in the wave were found, start the next wave
-		ZombieSpawns();
-
 	return best;
 }
 /*
@@ -443,6 +434,10 @@ qboolean FindTarget (edict_t *self)
 	qboolean	heardit;
 	int			r;
 	edict_t *monster;
+	
+	if (self->type == "home" || self->type == "homesungen") // House plants dont need to attack anyone
+		return;
+
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 	{
 		if (self->goalentity && self->goalentity->inuse && self->goalentity->classname)

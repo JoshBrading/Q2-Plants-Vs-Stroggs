@@ -1566,6 +1566,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	pmove_t	pm;
 	//=====================================================
 	add_suns(ent); // Check if suns should be added
+	if (!game_started) // Since the game is topdown make the player look down before starting
+		gi.AddCommandString("+lookdown");
 	//=====================================================
 	level.current_entity = ent;
 	client = ent->client;

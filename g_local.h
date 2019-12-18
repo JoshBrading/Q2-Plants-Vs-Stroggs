@@ -1101,4 +1101,5 @@ struct edict_s
 };
 
 int suns;
-extern int wave_count;
+int wave_count;
+int game_started;

@@ -55,6 +55,12 @@ void SelectNextItem (edict_t *ent, int itflags)
 	int current_type = ent->type;
 	if (current_type == "Peashooter")
 		ent->type = "Repeater";
+	if (current_type == "Repeater")
+		ent->type = "Threepeater";
+	if (current_type == "Threepeater")
+		ent->type = "Sunflower";
+	if (current_type == "Sunflower")
+		ent->type = "Peashooter";
 	Cmd_Help_f(ent);
 	/*
 	gclient_t	*cl;
@@ -90,9 +96,17 @@ void SelectNextItem (edict_t *ent, int itflags)
 
 void SelectPrevItem (edict_t *ent, int itflags)
 {
+	Cmd_Help_f(ent);
 	int current_type = ent->type;
+	if (current_type == "Peashooter")
+		ent->type = "Sunflower";
 	if (current_type == "Repeater")
 		ent->type = "Peashooter";
+	if (current_type == "Threepeater")
+		ent->type = "Repeater";
+	if (current_type == "Sunflower")
+		ent->type = "Threepeater";
+	Cmd_Help_f(ent);
 	/*
 	gclient_t	*cl;
 	int			i, index;
@@ -945,17 +959,17 @@ void add_suns(edict_t *client)
 		vec3_t coord = { 2520, 200, -47 };
 		while ((PvS = findradius(PvS, coord, 1024)) != NULL)
 		{
-			if (PvS->type == 6){
+			if (PvS->type == "homesungen" || PvS->type == "Sunflower"){
 				sunflowers++;
 			}
 		}
-		suns += 25 * sunflowers;
+		suns += 100 * sunflowers;
 		PvSTimer += 0.5;
 		Cmd_Help_f(client);
 	}
-	if (suns > sun_start){
-		gi.cprintf(client, PRINT_CHAT, "\n \n+%i SUNS!\nCurrent Suns: %i\nPress 'F1' to open menu", 25 * sunflowers, suns);
-	}
+//	if (suns > sun_start){
+//		gi.cprintf(client, PRINT_CHAT, "\n \n+%i SUNS!\nCurrent Suns: %i\nPress 'F1' to open menu", 25 * sunflowers, suns);
+//	}
 }
 /*
 =================
@@ -970,8 +984,8 @@ void Cmd_Build_f(edict_t *ent)
 	// (2760, 840, -10) is bottom right of board
 	// (2610, 570, ...) is ~center of board
 	vec3_t gameSpawn = { 2610, 570, 250 };
-	vec3_t rAnim1 = { 2520, 200, -47 },		rAnim2 = { 2760, 840, -47 },	rAnim3 = { 2420, 300, -47 },	rAnim4 = { 2800, 840, -47 };
-	vec3_t rDir1 = { 0, 90, 0 },			rDir2 = { 0, -90, 0 },			rDir3 = { 90, 0, 0 },			rDir4 = { -90, 0, 0 };
+	//vec3_t rAnim1 = { 2520, 200, -47 },		rAnim2 = { 2760, 840, -47 },	rAnim3 = { 2420, 300, -47 },	rAnim4 = { 2800, 840, -47 };
+	//vec3_t rDir1 = { 0, 90, 0 },			rDir2 = { 0, -90, 0 },			rDir3 = { 90, 0, 0 },			rDir4 = { -90, 0, 0 };
 
 	int rDamage = 0, rSpeed = 50, rDR = 99, rRD = 99;
 	ent->movetype = MOVETYPE_NOCLIP;
@@ -981,23 +995,25 @@ void Cmd_Build_f(edict_t *ent)
 	ent->flags ^= FL_GODMODE;
 	if (!(ent->flags & FL_GODMODE))
 		ent->flags ^= FL_GODMODE;
+	gi.AddCommandString("-lookdown");
 
 	gi.cvar_set("cl_gun", "0"); // Hide players gun
 
 	VectorCopy(gameSpawn, ent->s.origin); // TP the player to the game
 
-	fire_rocket(ent, rAnim1, rDir1, rDamage, rSpeed, rDR, rRD); // Just a cool looking effect on the game start
-	fire_rocket(ent, rAnim2, rDir2, rDamage, rSpeed, rDR, rRD); // Maybe each new wave also....?
-	fire_rocket(ent, rAnim3, rDir3, rDamage, rSpeed, rDR, rRD); //
-	fire_rocket(ent, rAnim4, rDir4, rDamage, rSpeed, rDR, rRD); //
+	//fire_rocket(ent, rAnim1, rDir1, rDamage, rSpeed, rDR, rRD); // Just a cool looking effect on the game start
+	//fire_rocket(ent, rAnim2, rDir2, rDamage, rSpeed, rDR, rRD); // Maybe each new wave also....?
+	//fire_rocket(ent, rAnim3, rDir3, rDamage, rSpeed, rDR, rRD); //
+	//fire_rocket(ent, rAnim4, rDir4, rDamage, rSpeed, rDR, rRD); //
 
 	ent->type = "Peashooter"; //  Have the player start with a peashooter, mostly just cause its first in the help menu
-	
+	Cmd_Help_f(ent);
 	Cmd_Give_f(ent);
 	BuildBoardLoop();
 	HousePlantSpawns();
 	wave_count = 1;
-	ZombieSpawnSequence(12);
+	game_started = 1;
+	ZombieSpawns();
 }
 
 /*
