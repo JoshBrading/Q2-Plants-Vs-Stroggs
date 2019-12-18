@@ -25,29 +25,32 @@ Thanks to Robert Duffy for doing the grunt work of building this release.
 
 John Carmack
 Id Software
+ 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
 Plants Vs. Strogg’s
 
 A Plants Vs. Zombies mod for Quake 2. Plants defend the players house from zombies, if the zombies reach the house the player loses.
-
- 
+Note: This ONLY works with the provided map, "The Standoff" in the bonus folder.
+Type "start" in cmd to start the game.
+Use left and right bracket to cycle plants.
 
 Plants
 
-Sunflower
-Produces 25 sun per click
-Wall-nut
-Deal no damage and takes awhile to break down
-Peashooter
-Shoots a single projectile per shot
-Repeater
-Shoots projectiles in bursts of 2
-Threepeater
-Shoots 3 projectiles across 3 lanes per shot
-Potato Mines
-Landmine that takes awhile to charge, Kills anything that steps on it
-Cherry Bombs
-Explodes a few seconds after being placed
+*Sunflower
+ *Produces 25 sun per click
+*Wall-nut
+ *Deal no damage and takes awhile to break down
+*Peashooter
+ *Shoots a single projectile per shot
+*Repeater
+ *Shoots projectiles in bursts of 2
+*Threepeater
+ *Shoots 3 projectiles across 3 lanes per shot
+*Potato Mines
+ *Landmine that takes awhile to charge, Kills anything that steps on it
+*Cherry Bombs
+ *Explodes a few seconds after being placed
  
 
 Stroggs (Zombies)
@@ -63,16 +66,17 @@ Stroggs (Zombies)
 
 Gameplay
 
-5 x 9 play area
-Top down camera
-Zombies can only walk straight ahead, plants can only shoot straight ahead
-Sun drops
-Clicking sun drops gives the player 25-50 suns
-Store
-Spend sun to buy plants to place on the map
-Click to place plants
-End game
-If the Strogg’s (zombies) make their way through all the plants and off the game board the game is lost
+*5 x 9 play area
+*Top down camera
+*Zombies can only walk straight ahead, plants can only shoot straight ahead
+*Sun drops
+ *Clicking sun drops gives the player 25-50 suns
+*Store
+ *Spend sun to buy plants to place on the map
+ *Click to place plants
+*End game
+ *If the Strogg’s (zombies) make their way through all the plants and off the game board the game is lost
+
 Deliverables
 
 PvZ mechanics
