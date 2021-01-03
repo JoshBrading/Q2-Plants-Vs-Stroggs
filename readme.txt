@@ -28,14 +28,14 @@ Id Software
  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
-Plants Vs. Strogg’s
+# **Plants Vs. Strogg’s**
 
 A Plants Vs. Zombies mod for Quake 2. Plants defend the players house from zombies, if the zombies reach the house the player loses.
 Note: This ONLY works with the provided map, "The Standoff" in the bonus folder.
 Type "start" in cmd to start the game.
 Use left and right bracket to cycle plants.
 
-Plants
+## **Plants**
 
 *Sunflower
  *Produces 25 sun per click
@@ -53,35 +53,32 @@ Plants
  *Explodes a few seconds after being placed
  
 
-Stroggs (Zombies)
+## Stroggs (Zombies)
 
-*Zombie
-  *Basic zombie, dies fairly quickly
-*Cone Head Zombie
-  *Takes more damage to kill
-*Pole Vaulting Zombie
-  *Can vault over wall-nuts but has no health boost
-*Peashooter Zombie
-  *Takes the same damage to kill as the basic zombie but can also shoot projectiles at the plants
+- Zombie
+	- Basic zombie, dies fairly quickly
+- Cone Head Zombie
+	-   Takes more damage to kill
+- Pole Vaulting Zombie
+	-   Can vault over wall-nuts but has no health boost
+- Peashooter Zombie
+	-   Takes the same damage to kill as the basic zombie but can also shoot projectiles at the plants
 
-Gameplay
+## **Gameplay**
 
-*5 x 9 play area
-*Top down camera
-*Zombies can only walk straight ahead, plants can only shoot straight ahead
-*Sun drops
- *Clicking sun drops gives the player 25-50 suns
-*Store
- *Spend sun to buy plants to place on the map
- *Click to place plants
-*End game
- *If the Strogg’s (zombies) make their way through all the plants and off the game board the game is lost
+- 5 x 9 play area
+- Top down camera
+- Zombies can only walk straight ahead, plants can only shoot straight ahead
+- Sun drops
+-  Clicking sun drops gives the player 25-50 suns
+- Store
+-  spend sun to buy plants to place on the map
+-  Click to place plants
+- End game
+-  If the Strogg's (zombies) make their way through all the plants and off the game board the game is lost
 
-Deliverables
-
-PvZ mechanics
-7 plants
-4 zombie types
-Plant shop
-
-
+## **Deliverables**
+- PvZ mechanics
+- 7 plants
+- 4 zombie types
+- Plant shop
