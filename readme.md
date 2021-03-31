@@ -83,4 +83,7 @@ Use left and right bracket to cycle plants.
 - 4 zombie types
 - Plant shop
 
-![Screenshot](https://cdn.discordapp.com/attachments/571558018005860358/795576968317239306/unknown.png)
+
+![PvS](https://user-images.githubusercontent.com/50903485/113087649-17891c80-91b2-11eb-8f9f-78f8faf2cd3a.mp4)
+
+
